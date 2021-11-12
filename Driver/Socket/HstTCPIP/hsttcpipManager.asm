@@ -63,6 +63,7 @@ include assert.def
 
 include Objects/processC.def
 include medium.def
+include gpmi.def
 
 ;---------------------------------------------------------------------------
 ;				System Libraries
