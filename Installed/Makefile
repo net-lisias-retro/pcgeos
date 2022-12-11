@@ -132,8 +132,6 @@ minimalAppl	: minimalGame minimalUtils minimalTools minimalSavers \
 
 minimalUtils	: prefmgr
 
-minimalTools    : resedit
-
 minimalGame	: solitaire cword amateur bjack hearts gwpoker \
                   pyramid sokoban taipei uki mine column
 
@@ -1564,7 +1562,7 @@ Installed/Appl/Install/Instf:		ui ansic MAKEAPPL
 # to prevent this, ndo2000 directly uses the 'minimalxxx' calls and 'ndorest'
 
 ndo2000	: borlandobj minimalLoader minimalLibrary minimalDriver \
-	  minimalAppl ndorest minimalTools
+	  minimalAppl ndorest
 
 # The borland.obj is one of the first files that needs to be compiled
 # after a clean of the Installed directory.  The kernel and other
@@ -1719,6 +1717,3 @@ Installed/Appl/Tools/Timer:			ui text MAKEAPPL
 
 slides	: Installed/Appl/Slides
 Installed/Appl/Slides:				ui text impex convert MAKEAPPL
-
-resedit	: Installed/Appl/Tools/Localize
-Installed/Appl/Tools/Localize:		ui text spool MAKEAPPL

@@ -7,20 +7,13 @@ if "%~1"=="-fcc" (
 IF NOT DEFINED BASEBOX (SET BASEBOX=dosbox)
 set OLD_PATH=%cd%
 cd /D %LOCAL_ROOT%\gbuild\localpc 
-del /F %LOCAL_ROOT%\gbuild\localpc\IPX_STAT.txt
-start /B %BASEBOX% -conf %ROOT_DIR%\bin\basebox.conf -conf %LOCAL_ROOT%\basebox_user.conf -noconsole
+start cmd /C %BASEBOX% -conf %ROOT_DIR%\bin\basebox.conf 
 cd %OLD_PATH%
-@cls
-:waitForFile
-@IF EXIST %LOCAL_ROOT%\gbuild\localpc\IPX_STAT.txt GOTO foundFile
-@sleep 1s
-@echo|set /p="."
-@GOTO waitForFile
-:foundFile
+sleep 2s
 FINDSTR /r /c:"127.0.0.1 from port" %LOCAL_ROOT%\gbuild\localpc\IPX_STAT.txt | perl -e "my $status = <>; $status =~  m/(\d+)$/; printf('%%04X', $1);" > %LOCAL_ROOT%\gbuild\localpc\IPX_PORT.txt
 set /p IPX_PORT=<%LOCAL_ROOT%\gbuild\localpc\IPX_PORT.txt
 cls
-rem mode 120,50
+mode 120,50
 IF EXIST "%USERPROFILE%\swat.rc" (
    set CUSTOM_TCL_LOCATION=%USERPROFILE%\swat.rc
 ) ELSE IF EXIST "%cd%\swat.rc" (
