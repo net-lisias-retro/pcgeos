@@ -7,4 +7,4 @@ XGOCFLAGS = -L fjpeg
 # -w-  turn off some warnings
 #XCCOMFLAGS = -d -Z -Os -O -w-stu -w-par -WDE
 
-XLINKFLAGS = -N (C)2000\20NewDeal\20Inc.
+#XLINKFLAGS = -N (C)2000\20NewDeal\20Inc.
