@@ -125,6 +125,28 @@ RegisterStatus	record
 	RS_DATA:1			; data
 RegisterStatus	end
 
+
+
+GeosHostNetConnectCallbackData	struct
+	; input
+	GHNCCD_callback		fptr
+	GHNCCD_semaphore	word
+	
+	; output
+	GHNCCD_result		word
+
+GeosHostNetConnectCallbackData	ends
+
+GeosHostNetDisconnectCallbackData	struct
+	; input
+	GHNDCD_callback		fptr
+	GHNDCD_semaphore	word
+	
+	; output
+	GHNDCD_result		word
+
+GeosHostNetDisconnectCallbackData	ends
+
 COMMENT |-----------------------------------------------------------------
 
 The following data structure is used to preserve packet boundaries when

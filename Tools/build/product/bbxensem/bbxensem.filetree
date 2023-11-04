@@ -1096,7 +1096,7 @@ DIR (ensemble) {
 		}
 		DIR (Internet) {
 #			Appl/Breadbox/BbxBrow/JS{dbcs}/bbxbrow{ec}.geo GFS LOCALPC
-			Appl/Breadbox/BbxBrow/bbxbrow{ec}.geo GFS LOCALPC
+			Appl/Breadbox/BbxBrow/AB/bbxbrow{ec}.geo GFS LOCALPC
 			Appl/Breadbox/BbxChat/bbxchat{ec}.geo
 			Appl/Breadbox/NewsRead/newsread{ec}.geo
 			Appl/Breadbox/ftpc/ftpc{ec}.geo

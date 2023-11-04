@@ -33,6 +33,7 @@ SSLCALLHOST		proc	far	callID:byte,
 					data:dword, 
 					data2:dword, 
 					data3:word	
+		uses	di, si, cx, bx
 
 		.enter
 		
@@ -76,6 +77,10 @@ SSLCHECKHOST		proc	far
 	;	
 	; Check host call if SSL interface is available
 	;
+		uses	cx
+
+		.enter
+
 		mov	ax, 1 
 		mov	cx, 2
 		int	0xB0
@@ -84,12 +89,14 @@ SSLCHECKHOST		proc	far
 		jne	error
 		
 		mov	ax, -1
+done:
+		.leave
 		ret
 		
 error:
 		mov	ax, 0
 
-		ret
+		jmp     done
 
 SSLCHECKHOST		endp
 

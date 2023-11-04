@@ -114,6 +114,7 @@ DESCRIPTION:
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
 
+
 ;---------------------------------------------------------------------------
 ;		Dgroup
 ;---------------------------------------------------------------------------
@@ -1342,8 +1343,26 @@ REVISION HISTORY:
 	jwu	8/ 1/96			Nonblocking, interruptible version
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+TcpipDataConnReqCB	proc	far
+
+			pushf
+			push	bx
+			mov	ds:[si].GHNCCD_result, ax
+			mov	bx, ds:[si].GHNCCD_semaphore
+			call	ThreadVSem
+			pop	bx
+			popf
+			
+			ret
+			
+TcpipDataConnReqCB	endp
+
+
 TcpipDataConnectRequest	proc	far
 		uses	bx, cx, si, ds, es
+		
+callbackData	local	GeosHostNetConnectCallbackData
+		
 		.enter
 EC <		call	ECCheckCallerThread			>
 
@@ -1383,15 +1402,49 @@ EC <		call	ECCheckIPAddr				>
 		;mov	ax, MSG_TCPIP_OPEN_CONNECTION_ASM
 		;call	TcpipSendMsgToDriverThread
 
-		mov	ax, 1002
+		push	bx
+
+		; alloc semaphore 
+		mov	ax, bx
+		mov	bx, 1					; mutEx semaphore
+		call	ThreadAllocSem				 
+		
+		mov	callbackData.GHNCCD_callback.segment, cs
+		mov	callbackData.GHNCCD_callback.offset, offset cs:TcpipDataConnReqCB
+		mov	callbackData.GHNCCD_semaphore, bx
+		
+		push	ax
+		call	ThreadPSem			; get exclusive access
+		pop 	ax
+
+		mov	bx, ax
+		push	bp
+		lea	bp, callbackData
+		mov	ax, 1002			; async connect
 		int	0xB0
+		pop	bp
 
+		; wait for async completion
+		mov	bx, callbackData.GHNCCD_semaphore
+		call	ThreadPSem			; get exclusive access
 
+		; free semaphore
+		call	ThreadFreeSem
+		
+		pop	bx
+		
+		mov	ax, callbackData.GHNCCD_result
+		cmp	ax, 0
+		jz	ok
+		stc
+		jc	errorDestroy
+			
 	; 
 	; Send confirmation of data connect request.  Okay to 
 	; keep socket info block locked.  Client should not be
 	; calling us back for anything.
 	;
+ok:
 		mov	ax, bx
 		mov	bx, handle dgroup
 		call	MemDerefES
@@ -1557,10 +1610,67 @@ REVISION HISTORY:
 	jwu	7/ 7/94			Initial version
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
+
+TcpipDisconReqCB	proc	far
+
+			pushf
+			push	bx
+			mov	ds:[si].GHNDCD_result, ax
+			mov	bx, ds:[si].GHNDCD_semaphore
+			call	ThreadVSem
+			pop	bx
+			popf
+			
+			ret
+			
+TcpipDisconReqCB	endp
+
 TcpipDisconnectRequest	proc	far
-		uses	ax, bx, cx, si, ds
+		uses	ax, bx, cx, dx, si, ds
+
+callbackData	local	GeosHostNetDisconnectCallbackData
+
 		.enter
 
+		push	bx
+
+		; alloc semaphore 
+		mov	cx, bx
+		mov	bx, 1					; mutEx semaphore
+		call	ThreadAllocSem				 
+		
+		mov	callbackData.GHNDCD_callback.segment, cs
+		mov	callbackData.GHNDCD_callback.offset, offset cs:TcpipDisconReqCB
+		mov	callbackData.GHNDCD_semaphore, bx
+		
+		push	ax
+		call	ThreadPSem			; get exclusive access
+		pop 	ax
+
+		mov	bx, cx
+		
+		push	bp
+		lea	bp, callbackData
+		mov	ax, 1008			; async connect
+		int	0xB0
+		pop	bp
+
+		; wait for async completion
+		mov	bx, callbackData.GHNCCD_semaphore
+		call	ThreadPSem			; get exclusive access
+
+		; free semaphore
+		call	ThreadFreeSem
+		
+		pop	bx
+		
+		mov	ax, callbackData.GHNDCD_result
+		cmp	ax, 0
+		jz	done
+		stc
+		jc	exit
+
+if 0
 		Assert	etype ax, SocketCloseType		
 
 EC <		cmp	ax, SCT_FULL				>
@@ -1634,7 +1744,19 @@ doClose:
 		;cmp	cx, SCT_HALF
 		;je	exit				; carry already clear
 		;call	ThreadPSem			
+endif
+
 done:
+		mov	ax, bx
+		mov	di, SCO_CONNECTION_CLOSED
+
+		mov	bx, handle dgroup
+		call	MemDerefDS
+
+		mov	bx, ds:[clients].TCI_data.CI_domain
+		mov	dx, 0
+		pushdw	ds:[clients].TCI_data.CI_entry
+		call	PROCCALLFIXEDORMOVABLE_PASCAL
 		clc					
 exit:		
 		.leave
@@ -1730,7 +1852,12 @@ errDone:
 		call	HugeLMemUnlock				
 		pop	es, bx, cx, si				
 
-		;stc				; else, indicate error
+		clc
+		cmp	ax, 0
+		je	noError
+		stc				; else, indicate error
+		mov	ax, SDE_INTERRUPTED
+noError:
 		jmp		silentFreeBuf
 
 freeBuffer:
@@ -1786,6 +1913,7 @@ TcpipStopSendData	proc	far
 
 		uses	bx, cx, si, ds
 		.enter
+if 0
 	;
 	; Gain access so we don't get preempted by a send data or a
 	; disconnect request.  Verify connection handle.
@@ -1814,7 +1942,8 @@ TcpipStopSendData	proc	far
 exit:
 		;call	TSocketUnlockInfoExcl		
 		call	TcpipReleaseAccess
-
+endif		
+		clc
 		.leave
 		ret
 TcpipStopSendData	endp
