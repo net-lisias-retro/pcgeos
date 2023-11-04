@@ -79,7 +79,7 @@ tcpInput.eobj: geos.h resource.h Ansi/string.h lmem.h timer.h timedate.h \
                 ec.h Internal/socketDr.h sockmisc.h ip.h tcp.h tcpip.h \
                 tcpipLog.h
 tcpipLog.obj \
-tcpipLog.eobj: c:/workspace/bluewaysw/pcgeos/Driver/Socket/TCPIP/tcpipLog.c
+tcpipLog.eobj: tcpipLog.c
 tcpOutput.obj \
 tcpOutput.eobj: geos.h resource.h Ansi/string.h lmem.h timer.h timedate.h \
                 ec.h Internal/socketDr.h sockmisc.h ip.h tcp.h tcpip.h \
@@ -113,7 +113,7 @@ tcpInput.eobj: geos.h resource.h Ansi/string.h lmem.h timer.h timedate.h \
                 ec.h Internal/socketDr.h sockmisc.h ip.h tcp.h tcpip.h \
                 tcpipLog.h
 tcpipLog.obj \
-tcpipLog.eobj: c:/workspace/bluewaysw/pcgeos/Driver/Socket/TCPIP/tcpipLog.c
+tcpipLog.eobj: tcpipLog.c
 tcpOutput.obj \
 tcpOutput.eobj: geos.h resource.h Ansi/string.h lmem.h timer.h timedate.h \
                 ec.h Internal/socketDr.h sockmisc.h ip.h tcp.h tcpip.h \
@@ -126,7 +126,7 @@ udp.obj \
 udp.eobj: geos.h resource.h Ansi/string.h lmem.h initfile.h ec.h \
                 Internal/socketDr.h sockmisc.h ip.h udp.h icmp.h tcpip.h \
                 timer.h tcpipLog.h
-tcpipStrings.rdef: c:/workspace/bluewaysw/pcgeos/Driver/Socket/TCPIP/tcpipStrings.ui
+tcpipStrings.rdef: tcpipStrings.ui
 tcpipAddrCtrl.rdef: generic.uih product.uih
 tcpipManager.obj \
 tcpipManager.eobj: geos.def heap.def geode.def resource.def ec.def system.def \
