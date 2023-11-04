@@ -132,6 +132,8 @@ minimalAppl	: minimalGame minimalUtils minimalTools minimalSavers \
 
 minimalUtils	: prefmgr
 
+minimalTools    : resedit
+
 minimalGame	: solitaire cword amateur bjack hearts gwpoker \
                   pyramid sokoban taipei uki mine column
 
@@ -1340,13 +1342,13 @@ Installed/Library/SSL:				ansic socket mapheap MAKELIB
 
 # product-specific dependency on fjpeg
 impgraph	: Installed/Library/Breadbox/ImpGraph
-Installed/Library/Breadbox/ImpGraph:		ansic ijgjpeg MAKELIB #fjpeg
+Installed/Library/Breadbox/ImpGraph:		ansic ijgjpeg fjpeg MAKELIB 
 
 ijgjpeg	: 	Installed/Library/Breadbox/Ijgjpeg
 Installed/Library/Breadbox/Ijgjpeg:		ui ansic MAKELIB
 
-#fjpeg	: 	Installed/Library/Breadbox/fjpeg
-#Installed/Library/Breadbox/fjpeg:		ui ansic MAKELIB
+fjpeg	: 	Installed/Library/Breadbox/Fjpeg
+Installed/Library/Breadbox/Fjpeg:		ui ansic MAKELIB
 #	mdcd %ROOT_DIR%\
 #	$(MAKE) -I$(ROOT_DIR)\Library\Breadbox\fjpeg lib full
 
@@ -1562,7 +1564,7 @@ Installed/Appl/Install/Instf:		ui ansic MAKEAPPL
 # to prevent this, ndo2000 directly uses the 'minimalxxx' calls and 'ndorest'
 
 ndo2000	: borlandobj minimalLoader minimalLibrary minimalDriver \
-	  minimalAppl ndorest
+	  minimalAppl ndorest minimalTools
 
 # The borland.obj is one of the first files that needs to be compiled
 # after a clean of the Installed directory.  The kernel and other
@@ -1717,3 +1719,6 @@ Installed/Appl/Tools/Timer:			ui text MAKEAPPL
 
 slides	: Installed/Appl/Slides
 Installed/Appl/Slides:				ui text impex convert MAKEAPPL
+
+resedit	: Installed/Appl/Tools/Localize
+Installed/Appl/Tools/Localize:		ui text spool MAKEAPPL
