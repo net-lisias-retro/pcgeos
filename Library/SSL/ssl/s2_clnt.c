@@ -68,6 +68,7 @@
 #include "objects.h"
 #include "ssl_locl.h"
 #include "evp.h"
+#include "ssl_host.h"
 
 #ifndef NOPROTO
 static int get_server_finished(SSL *s);
