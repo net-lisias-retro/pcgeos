@@ -131,6 +131,7 @@ GeosHostNetConnectCallbackData	struct
 	; input
 	GHNCCD_callback		fptr
 	GHNCCD_semaphore	word
+	GHNCCD_semaphore2	word
 	
 	; output
 	GHNCCD_result		word
@@ -141,6 +142,7 @@ GeosHostNetDisconnectCallbackData	struct
 	; input
 	GHNDCD_callback		fptr
 	GHNDCD_semaphore	word
+	GHNDCD_semaphore2	word
 	
 	; output
 	GHNDCD_result		word

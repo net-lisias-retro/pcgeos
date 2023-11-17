@@ -115,6 +115,8 @@ DESCRIPTION:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
 
 
+GEOS_HOST_API   = 0xA0
+
 ;---------------------------------------------------------------------------
 ;		Dgroup
 ;---------------------------------------------------------------------------
@@ -464,6 +466,8 @@ REVISION HISTORY:
 TcpipReceiveInterrupt	proc	far
 
 	pushf
+EC <	call	ECCheckStack						>
+
 	push	ax, bx, cx, dx, si, di, bp, ds, es
 	;call	SysEnterInterrupt
 	cld					;clear direction flag
@@ -507,7 +511,7 @@ EC <		WARNING	TCPIP_RECEIVE_STOP		>
 
 	; close the socket on host side
 		mov	ax, 1007
-		int	0xB0
+		int	GEOS_HOST_API
 done:
 		.leave
 		ret
@@ -526,7 +530,7 @@ newBuffer 	local	optr
 closeLoop:
 	; get next receive buffer size
 		mov	ax, 1006		; get next receive close socket
-		int	0xB0
+		int	GEOS_HOST_API
 
 		cmp	cx, 0
 		je	recvLoop		; branch, no more closed links
@@ -566,7 +570,7 @@ recvLoop:
 
 	; get next receive buffer size
 		mov	ax, 1004		; get recv buf size
-		int	0xB0
+		int     GEOS_HOST_API
 
 	; done if size 0 or below
 		cmp	cx, 0
@@ -612,7 +616,7 @@ doRecv:
 
 		mov	cx, ax
 		mov	ax, 1005		; get recv buf size
-		int	0xB0
+		int	GEOS_HOST_API
 
 		pop	di
 
@@ -720,7 +724,7 @@ TcpipInit	proc	far
 	;
 		mov	ax, 1 
 		mov cx, 1
-		int	0xB0
+		int	GEOS_HOST_API
 
 		cmp	ax, 0
 		jne	error
@@ -731,7 +735,7 @@ TcpipInit	proc	far
 		segmov	es, <segment ResidentCode>
 		mov	bx, offset ResidentCode:TcpipReceiveInterrupt
 		mov	ax, 2
-		int	0xB0
+		int	GEOS_HOST_API
 
 	;
 	; Create the input queue.
@@ -840,7 +844,7 @@ TcpipExit	proc	far
 		clr	bx
 		mov	es, bx
 		mov	ax, 2
-		int	0xB0
+		int	GEOS_HOST_API
 
 		mov	bx, handle dgroup
 		call	MemDerefDS		
@@ -1346,10 +1350,14 @@ REVISION HISTORY:
 TcpipDataConnReqCB	proc	far
 
 			pushf
+EC <	call	ECCheckStack						>
 			push	bx
 			mov	ds:[si].GHNCCD_result, ax
+if 0
 			mov	bx, ds:[si].GHNCCD_semaphore
 			call	ThreadVSem
+endif
+			inc	ds:[si].GHNCCD_semaphore2
 			pop	bx
 			popf
 			
@@ -1412,23 +1420,29 @@ EC <		call	ECCheckIPAddr				>
 		mov	callbackData.GHNCCD_callback.segment, cs
 		mov	callbackData.GHNCCD_callback.offset, offset cs:TcpipDataConnReqCB
 		mov	callbackData.GHNCCD_semaphore, bx
-		
+		mov	callbackData.GHNCCD_semaphore2, 0
+
+if 0
 		push	ax
 		call	ThreadPSem			; get exclusive access
 		pop 	ax
-
+endif
 		mov	bx, ax
 		push	bp
 		lea	bp, callbackData
 		mov	ax, 1002			; async connect
-		int	0xB0
+		int     GEOS_HOST_API
 		pop	bp
-
+waitHere:
+                cmp     callbackData.GHNCCD_semaphore2, 0
+                je      waitHere
+if 0
 		; wait for async completion
 		mov	bx, callbackData.GHNCCD_semaphore
 		call	ThreadPSem			; get exclusive access
-
+endif
 		; free semaphore
+		mov	bx, callbackData.GHNCCD_semaphore
 		call	ThreadFreeSem
 		
 		pop	bx
@@ -1614,10 +1628,16 @@ REVISION HISTORY:
 TcpipDisconReqCB	proc	far
 
 			pushf
+
+EC <	call	ECCheckStack						>
+
 			push	bx
 			mov	ds:[si].GHNDCD_result, ax
+if 0
 			mov	bx, ds:[si].GHNDCD_semaphore
 			call	ThreadVSem
+endif                        
+                        inc     ds:[si].GHNDCD_semaphore2
 			pop	bx
 			popf
 			
@@ -1642,24 +1662,32 @@ callbackData	local	GeosHostNetDisconnectCallbackData
 		mov	callbackData.GHNDCD_callback.segment, cs
 		mov	callbackData.GHNDCD_callback.offset, offset cs:TcpipDisconReqCB
 		mov	callbackData.GHNDCD_semaphore, bx
+		mov	callbackData.GHNDCD_semaphore2, 0
 		
+if 0
 		push	ax
 		call	ThreadPSem			; get exclusive access
 		pop 	ax
-
+endif
 		mov	bx, cx
 		
 		push	bp
 		lea	bp, callbackData
 		mov	ax, 1008			; async connect
-		int	0xB0
+		int	GEOS_HOST_API
 		pop	bp
 
 		; wait for async completion
+waitHere:
+                cmp     callbackData.GHNCCD_semaphore2, 0
+                je      waitHere
+if 0
 		mov	bx, callbackData.GHNCCD_semaphore
 		call	ThreadPSem			; get exclusive access
+endif
 
 		; free semaphore
+		mov	bx, callbackData.GHNCCD_semaphore
 		call	ThreadFreeSem
 		
 		pop	bx
@@ -1845,7 +1873,7 @@ EC <		call	ECCheckCallerThread			>
 		; bx connection handle
 		pop	bx
 		mov	ax, 1003
-		int	0xB0
+		int	GEOS_HOST_API
 errDone:
 		pop	dx
 		mov		bx, dx
@@ -3080,10 +3108,10 @@ if 0
 		push	bx	; link address size
 		mov	cx, 0
 		mov	bh, 0
-		mov 	bl, 0xB0 ; GEOS host
+		mov 	bl, GEOS_HOST_API ; GEOS host
 
 		mov ax, 1000		; resolve address
-		int	0xB0
+		int	GEOS_HOST_API
 		
 		;call    SysRealInterrupt		
 		pushf
@@ -4995,7 +5023,7 @@ doQuery:
 		mov	ax, 1000			; resolve address
 							; dxbp = addr or
 							;  dx = ResolverError
-		int	0xB0
+		int	GEOS_HOST_API
 		
 		;lahf
 
