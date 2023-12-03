@@ -1,4 +1,5 @@
 @include <stdapp.goh>
+#include <sem.h>
 
 extern void
 	_pascal TcpipReceiveStart(word link);
@@ -69,6 +70,7 @@ extern void
 @message void MSG_TCPIP_DHCP_RENEW_NOW();
 
 @message void MSG_TCPIP_START_RECEIVE();
+@message void MSG_TCPIP_ASYNC_UNLOCK(word sem = cx);
 
 @endc;
 
@@ -80,4 +82,9 @@ extern void
 @method TcpipProcessClass, MSG_TCPIP_START_RECEIVE {
 
 	TcpipReceiveStart(0);
+}
+
+@method TcpipProcessClass, MSG_TCPIP_ASYNC_UNLOCK {
+
+    ThreadVSem(sem);
 }

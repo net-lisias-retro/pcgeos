@@ -466,11 +466,13 @@ REVISION HISTORY:
 TcpipReceiveInterrupt	proc	far
 
 	pushf
-EC <	call	ECCheckStack						>
 
 	push	ax, bx, cx, dx, si, di, bp, ds, es
-	;call	SysEnterInterrupt
+	call	SysEnterInterrupt
 	cld					;clear direction flag
+	INT_ON
+
+EC <	call	ECCheckStack						>
 
 	; scheduled receiving data
 	mov	ax, MSG_TCPIP_START_RECEIVE_ASM
@@ -487,7 +489,7 @@ EC <		Assert	thread	bx				>
 	call	ObjMessage
 	pop	bx
 
-	;call	SysExitInterrupt
+	call	SysExitInterrupt
 	pop	ax, bx, cx, dx, si, di, bp, ds, es
 	popf
 	ret
@@ -1349,19 +1351,39 @@ REVISION HISTORY:
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%@
 TcpipDataConnReqCB	proc	far
 
-			pushf
-EC <	call	ECCheckStack						>
-			push	bx
-			mov	ds:[si].GHNCCD_result, ax
+		;pushf
+		;push	ax, bx, cx, dx, si, di, bp, ds, es
+		;call	SysEnterInterrupt
+		;cld					;clear direction flag
+		;INT_OFF
+
+EC <		call	ECCheckStack						>
+		;push	bx, di, cx
+		mov	ds:[si].GHNCCD_result, ax
+		;mov	cx, ds:[si].GHNCCD_semaphore
 if 0
-			mov	bx, ds:[si].GHNCCD_semaphore
-			call	ThreadVSem
+		; scheduled receiving data
+		mov	ax, MSG_TCPIP_ASYNC_UNLOCK_ASM
+		
+		push	bx
+		mov	bx, handle dgroup
+		call	MemDerefDS
+		mov	bx, ds:[driverThread]
+	
+EC <		Assert	thread	bx				>		
+
+		mov	di, mask MF_FORCE_QUEUE
+		call	ObjMessage
+		pop	bx
 endif
-			inc	ds:[si].GHNCCD_semaphore2
-			pop	bx
-			popf
+		inc	ds:[si].GHNCCD_semaphore2
+		;pop	bx, di, cx
+
+		;call	SysExitInterrupt
+		;pop	ax, bx, cx, dx, si, di, bp, ds, es
+		;popf
 			
-			ret
+		ret
 			
 TcpipDataConnReqCB	endp
 
@@ -1627,21 +1649,40 @@ REVISION HISTORY:
 
 TcpipDisconReqCB	proc	far
 
-			pushf
+		;pushf
+		;push	ax, bx, cx, dx, si, di, bp, ds, es
+		;call	SysEnterInterrupt
+		;cld					;clear direction flag
+		;INT_OFF
 
-EC <	call	ECCheckStack						>
+EC <		call	ECCheckStack						>
 
-			push	bx
-			mov	ds:[si].GHNDCD_result, ax
+		;push	bx, di, cx
+		mov	ds:[si].GHNDCD_result, ax
+		;mov	cx, ds:[si].GHNDCD_semaphore
 if 0
-			mov	bx, ds:[si].GHNDCD_semaphore
-			call	ThreadVSem
+		; scheduled receiving data
+		mov	ax, MSG_TCPIP_ASYNC_UNLOCK_ASM
+		
+		push	bx
+		mov	bx, handle dgroup
+		call	MemDerefDS
+		mov	bx, ds:[driverThread]
+	
+EC <		Assert	thread	bx				>		
+
+		mov	di, mask MF_FORCE_QUEUE
+		call	ObjMessage
+		pop	bx
 endif                        
-                        inc     ds:[si].GHNDCD_semaphore2
-			pop	bx
-			popf
+                inc     ds:[si].GHNDCD_semaphore2
+		;pop	bx, di, cx
+		
+		;call	SysExitInterrupt
+		;pop	ax, bx, cx, dx, si, di, bp, ds, es
+		;popf
 			
-			ret
+		ret
 			
 TcpipDisconReqCB	endp
 

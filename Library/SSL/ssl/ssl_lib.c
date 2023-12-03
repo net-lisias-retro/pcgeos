@@ -81,13 +81,6 @@ static STACK *ssl_ctx_meth=NULL;
 static int ssl_meth_num=0;
 static int ssl_ctx_meth_num=0;
 
-#ifdef COMPILE_OPTION_HOST_SERVICE
-static MemHandle ssl_hostExchangeBuffer = NullHandle;
-
-void* SSLHostExchangeBuffer();
-
-#endif
-
 SSL3_ENC_METHOD ssl3_undef_enc_method={
 	ssl_undefined_function,
 	ssl_undefined_function,
@@ -387,7 +380,7 @@ int fd;
 			
 		return (int) SSLCallHost(
 			SSLHFN_SSL_SET_FD, (dword) s, (dword)  
-			SSLHostExchangeBuffer(), (word) intHdl);
+			(dword) NULL, (word) intHdl);
 		}
 #endif
 
@@ -406,23 +399,6 @@ err:
         SSLLeave() ;
 	return(ret);
 	}
-
-#ifdef COMPILE_OPTION_HOST_SERVICE
-
-void* SSLHostExchangeBuffer() 
-	{
-	void* retValue;
-	PUSHDS;
-	if (ssl_hostExchangeBuffer == NullHandle)
-		{
-		ssl_hostExchangeBuffer = MemAlloc(8192, HF_FIXED, 0);
-		}
-	retValue = MemDeref(ssl_hostExchangeBuffer);
-	POPDS;
-	return retValue;
-	}
-
-#endif
 
 #ifndef GEOS_CLIENT
 
@@ -1637,6 +1613,20 @@ SSL_METHOD *meth;
 			s->handshake_func=meth->ssl_accept;
 		}
 	SSLLeave();
+	return(ret);
+	}
+
+int _pascal _export  SSL_set_tlsext_host_name(SSL *ssl, char *name)
+	{
+	int ret=1;
+
+	#ifdef COMPILE_OPTION_HOST_SERVICE
+		if(SSLCheckHost())
+			{
+			return (SSL_METHOD *) SSLCallHost(
+				SSLHFN_SSL_SET_TLSEXT_HOST_NAME, (dword) ssl, (dword) name, strlen(name));
+			}
+	#endif
 	return(ret);
 	}
 

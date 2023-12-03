@@ -47,7 +47,7 @@ SSLCALLHOST		proc	far	callID:byte,
 		clr	ah
 		add	ax, HF_SSL_BASE
 		
-		int	0xB0
+		int	0xA0
 
 		.leave
 		
@@ -83,7 +83,7 @@ SSLCHECKHOST		proc	far
 
 		mov	ax, 1 
 		mov	cx, 2
-		int	0xB0
+		int	0xA0
 
 		cmp	ax, 0
 		jne	error

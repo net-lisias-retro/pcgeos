@@ -42,5 +42,5 @@ HostFunctions	etype	word
 	HF_SSL_BASE			enum	HostFunctions, 1200
 	HF_SSL3_GET_CLIENT_METHOD	enum	HostFunctions, HF_SSL_BASE
 
-HOST_INT		equ	0xB0
+HOST_INT		equ	0xA0
 

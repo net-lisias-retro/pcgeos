@@ -436,6 +436,7 @@ MSG_TCPIP_DHCP_RENEW_NOW_ASM	message
 ; Don't directly send.
 
 MSG_TCPIP_START_RECEIVE_ASM		message
+MSG_TCPIP_ASYNC_UNLOCK_ASM		message
 
 
 ifdef PASCAL_CONV

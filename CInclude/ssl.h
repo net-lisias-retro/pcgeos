@@ -84,4 +84,7 @@ int _pascal _export SSL_shutdown(SSL *s);
 SSL_METHOD * _pascal _export SSL_get_ssl_method(SSL *s);
 int _pascal _export SSL_set_ssl_method(SSL *s, SSL_METHOD *meth);
 
+
+int _pascal _export  SSL_set_tlsext_host_name(SSL *ssl, char *name);
+
 #endif /* _SSL_H_ */

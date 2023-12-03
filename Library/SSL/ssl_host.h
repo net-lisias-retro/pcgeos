@@ -21,6 +21,7 @@ typedef ByteEnum SSLHostFunctionNumber;
 #define SSLHFN_SSLV3_CLIENT_METHOD		12
 #define SSLHFN_SSL_GET_SSL_METHOD		13
 #define SSLHFN_SET_CALLBACK			14
+#define SSLHFN_SSL_SET_TLSEXT_HOST_NAME		15
 
 
 extern Boolean _far _pascal SSLCheckHost();
